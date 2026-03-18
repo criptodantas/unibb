@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniBB AI Assistant - Assistente Virtual Inteligente</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/parallel-improvements.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/parallel-execution.js"></script>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1>UniBB AI Assistant</h1>
+                </div>
+                <p class="subtitle">Assistente Virtual Inteligente para UniBB</p>
+                <div class="precision-badge">
+                    <i class="fas fa-brain"></i>
+                    <span>Precisão 92.4%</span>
+                </div>
+            </div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Login UniBB (Matrícula BB)</label>
+                    <input type="text" id="loginInput" placeholder="Ex: F1234567" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Senha</label>
+                    <input type="password" id="senhaInput" placeholder="Sua senha do BB" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-globe"></i> URL da Plataforma</label>
+                    <input type="text" id="urlInput" value="https://unibb.com.br" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-cogs"></i> Modo de Operação</label>
+                    <div class="mode-selector">
+                        <div class="mode-option selected" data-mode="web">
+                            <i class="fas fa-desktop"></i>
+                            <span>Web (Site)</span>
+                        </div>
+                        <div class="mode-option" data-mode="mobile">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>App Mobile</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Chave API OpenAI (para IA)</label>
+                    <input type="password" id="apiKeyInput" placeholder="sk-proj-..." autocomplete="off">
+                    <small>Para responder questões com IA de alta precisão</small>
+                </div>
+
+                <button class="btn-primary" id="btnConectar">
+                    <i class="fas fa-rocket"></i> Conectar e Iniciar Assistente
+                </button>
+
+                <div class="demo-mode">
+                    <button class="btn-secondary" id="btnDemo">
+                        <i class="fas fa-eye"></i> Modo Demonstração (sem credenciais)
+                    </button>
+                </div>
+            </div>
+
+            <div class="login-footer">
+                <p><i class="fas fa-shield-alt"></i> Seus dados são criptografados e seguros</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboardScreen" class="screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-robot"></i>
+                <span>UniBB AI</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="navegacao">
+                    <i class="fas fa-compass"></i>
+                    <span>Navegação Automática</span>
+                </a>
+                <a href="#" class="nav-item" data-section="questoes">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Responder Questões</span>
+                </a>
+                <a href="#" class="nav-item" data-section="simulados">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Simulados</span>
+                </a>
+                <a href="#" class="nav-item" data-section="conteudo">
+                    <i class="fas fa-book"></i>
+                    <span>Leitura de Conteúdo</span>
+                </a>
+                <a href="#" class="nav-item" data-section="relatorios">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Relatórios</span>
+                </a>
+                <a href="#" class="nav-item" data-section="configuracoes">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="#" class="nav-item" data-section="codigo">
+                    <i class="fas fa-code"></i>
+                    <span>Código Python</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <div>
+                        <strong id="userLogin">F1234567</strong>
+                        <small>Conectado</small>
+                    </div>
+                </div>
+                <button class="btn-logout" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="top-bar">
+                <h2 id="sectionTitle">Dashboard</h2>
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span id="statusText">Online</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="section-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Status da Conexão</h3>
+                            <p class="stat-value">Conectado</p>
+                            <small>Último acesso: Agora</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Progresso</h3>
+                            <p class="stat-value" id="progressValue">12 cursos</p>
+                            <small>68% concluído - 3 certificações</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Precisão da IA</h3>
+                            <p class="stat-value animated-number" data-target="92.4">0%</p>
+                            <small>Baseado em 847 questões</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Questões Respondidas</h3>
+                            <p class="stat-value animated-number" data-target="847">0</p>
+                            <small>783 corretas • 64 incorretas</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-line"></i> Evolução da Precisão</h3>
+                        <canvas id="precisionChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Distribuição por Matéria</h3>
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h3><i class="fas fa-history"></i> Atividade Recente</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <i class="fas fa-check-circle success"></i>
+                            <div>
+                                <strong>Simulado de Matemática Financeira</strong>
+                                <p>Concluído com 94% de acerto • Há 2 horas</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-book-reader info"></i>
+                            <div>
+                                <strong>Leitura: Produtos Bancários</strong>
+                                <p>PDF processado e memorizado • Há 3 horas</p>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-robot primary"></i>
+                            <div>
+                                <strong>72 questões respondidas automaticamente</strong>
+                                <p>Curso: Gestão de Riscos • Há 5 horas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação Automática Section -->
+            <div class="content-section" id="section-navegacao">
+                <div class="section-header">
+                    <h3><i class="fas fa-compass"></i> Navegação Automática - Modo Paralelo (até 5 cursos)</h3>
+                    <p>Escaneie, priorize e automatize múltiplos cursos simultaneamente</p>
+                </div>
+
+                <div class="parallel-info-banner">
+                    <i class="fas fa-layer-group"></i>
+                    <div>
+                        <strong>Execução Paralela Ativada</strong>
+                        <p>Execute até 5 cursos ao mesmo tempo para máxima eficiência</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="btnEscanear">
+                        <i class="fas fa-search"></i> Escanear Cursos Disponíveis
+                    </button>
+                    <button class="btn-secondary" id="btnFiltrarPrioridade">
+                        <i class="fas fa-filter"></i> Filtrar por Prioridade
+                    </button>
+                    <button class="btn-secondary" id="btnOrdenarValor">
+                        <i class="fas fa-sort-amount-down"></i> Ordenar por Valor
+                    </button>
+                </div>
+
+                <div class="courses-list" id="coursesList" style="display: none;">
+                    <div class="courses-header">
+                        <h4>Cursos Encontrados</h4>
+                        <div class="filter-chips">
+                            <span class="chip active" data-filter="all">Todos (<span id="countAll">0</span>)</span>
+                            <span class="chip" data-filter="obrigatorio">Obrigatórios (<span id="countObrigatorio">0</span>)</span>
+                            <span class="chip" data-filter="alto-valor">Alto Valor (<span id="countAltoValor">0</span>)</span>
+                            <span class="chip" data-filter="em-andamento">Em Andamento (<span id="countAndamento">0</span>)</span>
+                        </div>
+                    </div>
+                    <div id="coursesContainer"></div>
+                    
+                    <div class="automation-controls">
+                        <button class="btn-success" id="btnIniciarAuto">
+                            <i class="fas fa-play"></i> Iniciar Automação Paralela
+                        </button>
+                        <button class="btn-warning" id="btnPausar" disabled>
+                            <i class="fas fa-pause"></i> Pausar Todas
+                        </button>
+                        <button class="btn-danger" id="btnParar" disabled>
+                            <i class="fas fa-stop"></i> Parar Todas
+                        </button>
+                    </div>
+
+                    <!-- Monitor de Abas Paralelas -->
+                    <div class="parallel-monitor" id="parallelMonitor" style="display: none;">
+                        <h4><i class="fas fa-layer-group"></i> Execução Paralela - Monitor de Abas</h4>
+                        <div class="tabs-grid" id="tabsGrid">
+                            <!-- Preenchido dinamicamente -->
+                        </div>
+                    </div>
+
+                    <div class="automation-controls">
+
+                    <div class="progress-bar" id="autoProgress" style="display: none;">
+                        <div class="progress-fill"></div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <div class="console-log">
+                    <div class="console-header">
+                        <i class="fas fa-terminal"></i> Console de Logs em Tempo Real
+                        <button class="btn-clear" id="btnClearLogs"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="console-content" id="consoleContent">
+                        <div class="log-entry info">[INFO] Sistema iniciado e pronto para automação</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responder Questões Section -->
+            <div class="content-section" id="section-questoes">
+                <div class="section-header">
+                    <h3><i class="fas fa-question-circle"></i> Responder Questões com IA</h3>
+                    <p>Cole uma questão e deixe a IA responder com alta precisão</p>
+                </div>
+
+                <div class="question-form">
+                    <div class="form-group">
+                        <label>Enunciado da Questão</label>
+                        <textarea id="questaoTexto" rows="6" placeholder="Cole aqui o texto da questão..."></textarea>
+                    </div>
+
+                    <div class="alternativas-grid">
+                        <div class="alternativa-item">
+                            <input type="radio" name="alternativa" id="altA" value="A">
+                            <label for="altA">
+                                <span class="alt-letter">A</span>
+                                <input type="text" id="altTextoA" placeholder="Texto da alternativa A">
+                            </label>
+                        </div>
+                        <div class="alternativa-item">
+                            <input type="radio" name="alternativa" id="altB" value="B">
+                            <label for="altB">
+                                <span class="alt-letter">B</span>
+                                <input type="text" id="altTextoB" placeholder="Texto da alternativa B">
+                            </label>
+                        </div>
+                        <div class="alternativa-item">
+                            <input type="radio" name="alternativa" id="altC" value="C">
+                            <label for="altC">
+                                <span class="alt-letter">C</span>
+                                <input type="text" id="altTextoC" placeholder="Texto da alternativa C">
+                            </label>
+                        </div>
+                        <div class="alternativa-item">
+                            <input type="radio" name="alternativa" id="altD" value="D">
+                            <label for="altD">
+                                <span class="alt-letter">D</span>
+                                <input type="text" id="altTextoD" placeholder="Texto da alternativa D">
+                            </label>
+                        </div>
+                        <div class="alternativa-item">
+                            <input type="radio" name="alternativa" id="altE" value="E">
+                            <label for="altE">
+                                <span class="alt-letter">E</span>
+                                <input type="text" id="altTextoE" placeholder="Texto da alternativa E">
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary btn-large" id="btnResponderIA">
+                        <i class="fas fa-robot"></i> Responder com IA
+                    </button>
+                </div>
+
+                <div class="resposta-container" id="respostaContainer" style="display: none;">
+                    <h4><i class="fas fa-lightbulb"></i> Resposta da IA</h4>
+                    <div class="resposta-card">
+                        <div class="resposta-header">
+                            <span class="resposta-letra" id="respostaLetra">A</span>
+                            <span class="confianca-badge" id="confiancaBadge">95%</span>
+                        </div>
+                        <div class="resposta-body">
+                            <h5>Explicação Detalhada:</h5>
+                            <p id="respostaExplicacao"></p>
+                            <h5>Fundamento Teórico:</h5>
+                            <p id="respostaFundamento"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="historico-questoes">
+                    <h4><i class="fas fa-history"></i> Histórico (Últimas 10 Questões)</h4>
+                    <div id="historicoContainer"></div>
+                </div>
+            </div>
+
+            <!-- Simulados Section -->
+            <div class="content-section" id="section-simulados">
+                <div class="section-header">
+                    <h3><i class="fas fa-clipboard-check"></i> Execução de Simulados</h3>
+                    <p>Execute simulados automaticamente com IA</p>
+                </div>
+
+                <div class="simulados-list">
+                    <div class="simulado-card">
+                        <div class="simulado-info">
+                            <h4>Simulado - Produtos Bancários</h4>
+                            <p>45 questões • Tempo: 90 minutos</p>
+                        </div>
+                        <button class="btn-primary" onclick="iniciarSimulado('produtos')">
+                            <i class="fas fa-rocket"></i> Executar
+                        </button>
+                    </div>
+                    <div class="simulado-card">
+                        <div class="simulado-info">
+                            <h4>Simulado - Matemática Financeira</h4>
+                            <p>30 questões • Tempo: 60 minutos</p>
+                        </div>
+                        <button class="btn-primary" onclick="iniciarSimulado('matematica')">
+                            <i class="fas fa-rocket"></i> Executar
+                        </button>
+                    </div>
+                    <div class="simulado-card">
+                        <div class="simulado-info">
+                            <h4>Simulado - Gestão de Riscos</h4>
+                            <p>50 questões • Tempo: 120 minutos</p>
+                        </div>
+                        <button class="btn-primary" onclick="iniciarSimulado('riscos')">
+                            <i class="fas fa-rocket"></i> Executar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="simulado-execucao" id="simuladoExecucao" style="display: none;">
+                    <div class="simulado-header">
+                        <h4 id="simuladoTitulo"></h4>
+                        <div class="timer" id="simuladoTimer">00:00:00</div>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="simuladoProgress"></div>
+                        <span class="progress-text" id="simuladoProgressText">0/0</span>
+                    </div>
+
+                    <div class="questao-atual">
+                        <h5>Questão <span id="questaoAtual">1</span>:</h5>
+                        <p id="questaoAtualTexto"></p>
+                    </div>
+
+                    <div class="simulado-resultado" id="simuladoResultado" style="display: none;">
+                        <h4><i class="fas fa-trophy"></i> Resultado do Simulado</h4>
+                        <div class="resultado-score">
+                            <div class="score-circle">
+                                <span class="score-value" id="notaFinal">0</span>
+                                <span class="score-label">pontos</span>
+                            </div>
+                        </div>
+                        <div class="resultado-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="acertosSimulado">0</span> acertos
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-times-circle"></i>
+                                <span id="errosSimulado">0</span> erros
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-percentage"></i>
+                                <span id="percentualSimulado">0</span>% aproveitamento
+                            </div>
+                        </div>
+                        <canvas id="simuladoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leitura de Conteúdo Section -->
+            <div class="content-section" id="section-conteudo">
+                <div class="section-header">
+                    <h3><i class="fas fa-book"></i> Leitura e Processamento de Conteúdo</h3>
+                    <p>Upload de PDFs ou cole textos para processamento e memorização</p>
+                </div>
+
+                <div class="upload-area">
+                    <div class="upload-box" id="uploadBox">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arraste um PDF aqui ou clique para selecionar</p>
+                        <input type="file" id="pdfInput" accept=".pdf" hidden>
+                        <button class="btn-secondary" onclick="document.getElementById('pdfInput').click()">
+                            <i class="fas fa-file-upload"></i> Selecionar PDF
+                        </button>
+                    </div>
+
+                    <div class="text-input-area">
+                        <label>Ou cole o conteúdo do texto/apostila:</label>
+                        <textarea id="conteudoTexto" rows="10" placeholder="Cole aqui o conteúdo que deseja processar..."></textarea>
+                        <button class="btn-primary" id="btnProcessarConteudo">
+                            <i class="fas fa-brain"></i> Processar e Memorizar Conteúdo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="conteudo-processado" id="conteudoProcessado" style="display: none;">
+                    <h4><i class="fas fa-check-circle"></i> Conteúdo Processado com Sucesso</h4>
+                    
+                    <div class="resumo-card">
+                        <h5><i class="fas fa-file-alt"></i> Resumo Automático</h5>
+                        <p id="resumoConteudo"></p>
+                    </div>
+
+                    <div class="pontos-chave">
+                        <h5><i class="fas fa-star"></i> Pontos-Chave Destacados</h5>
+                        <ul id="pontosChave"></ul>
+                    </div>
+
+                    <div class="flashcards">
+                        <h5><i class="fas fa-layer-group"></i> Flashcards Gerados</h5>
+                        <div class="flashcard-container" id="flashcardsContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Section -->
+            <div class="content-section" id="section-relatorios">
+                <div class="section-header">
+                    <h3><i class="fas fa-chart-line"></i> Relatórios e Analytics</h3>
+                    <p>Análise detalhada do seu desempenho</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="btnGerarPDF">
+                        <i class="fas fa-file-pdf"></i> Gerar Relatório PDF
+                    </button>
+                    <button class="btn-secondary" id="btnExportarCSV">
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card-full">
+                        <h4><i class="fas fa-chart-line"></i> Evolução da Precisão ao Longo do Tempo</h4>
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <h4><i class="fas fa-chart-bar"></i> Questões por Categoria</h4>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <h4><i class="fas fa-chart-pie"></i> Taxa de Acerto por Matéria</h4>
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="historico-table">
+                    <h4><i class="fas fa-table"></i> Histórico Completo</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Curso/Simulado</th>
+                                <th>Questões</th>
+                                <th>Acertos</th>
+                                <th>Taxa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historicoTable">
+                            <!-- Preenchido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Configurações Section -->
+            <div class="content-section" id="section-configuracoes">
+                <div class="section-header">
+                    <h3><i class="fas fa-cog"></i> Configurações do Bot</h3>
+                    <p>Personalize o comportamento do assistente</p>
+                </div>
+
+                <div class="config-grid">
+                    <div class="config-card">
+                        <h4><i class="fas fa-tachometer-alt"></i> Velocidade de Automação</h4>
+                        <div class="speed-selector">
+                            <button class="speed-btn" data-speed="slow">
+                                <i class="fas fa-turtle"></i> Lento
+                            </button>
+                            <button class="speed-btn active" data-speed="normal">
+                                <i class="fas fa-walking"></i> Normal
+                            </button>
+                            <button class="speed-btn" data-speed="fast">
+                                <i class="fas fa-running"></i> Rápido
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h4><i class="fas fa-clock"></i> Delay Entre Ações</h4>
+                        <input type="range" id="delaySlider" min="1" max="5" value="2" step="0.5">
+                        <span class="slider-value"><span id="delayValue">2</span> segundos</span>
+                    </div>
+
+                    <div class="config-card">
+                        <h4><i class="fas fa-user-secret"></i> Modo Stealth</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="stealthMode" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <p class="config-description">Simula comportamento humano para evitar detecção</p>
+                    </div>
+
+                    <div class="config-card">
+                        <h4><i class="fas fa-brain"></i> Modelo de IA</h4>
+                        <select id="aiModel" class="config-select">
+                            <option value="gpt-4o" selected>GPT-4o (Recomendado)</option>
+                            <option value="claude-3.5">Claude 3.5 Sonnet</option>
+                            <option value="gemini-pro">Gemini Pro</option>
+                        </select>
+                    </div>
+
+                    <div class="config-card">
+                        <h4><i class="fas fa-robot"></i> Resposta Automática</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoAnswer">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <p class="config-description">Responder automaticamente sem confirmação</p>
+                    </div>
+
+                    <div class="config-card">
+                        <h4><i class="fas fa-save"></i> Salvar Histórico</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="saveHistory" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <p class="config-description">Manter histórico de todas as respostas</p>
+                    </div>
+                </div>
+
+                <div class="config-advanced">
+                    <h4><i class="fas fa-cogs"></i> Configurações Avançadas</h4>
+                    <div class="form-group">
+                        <label>Chave API OpenAI</label>
+                        <input type="password" id="apiKeyConfig" placeholder="sk-proj-...">
+                    </div>
+                    <div class="form-group">
+                        <label>Timeout de Requisições (ms)</label>
+                        <input type="number" id="timeoutConfig" value="30000">
+                    </div>
+                    <div class="form-group">
+                        <label>Tentativas de Retry</label>
+                        <input type="number" id="retryConfig" value="3">
+                    </div>
+                    <button class="btn-primary">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+                </div>
+            </div>
+
+            <!-- Código Python Section -->
+            <div class="content-section" id="section-codigo">
+                <div class="section-header">
+                    <h3><i class="fas fa-code"></i> Código de Automação Python</h3>
+                    <p>Baixe e execute o bot localmente</p>
+                </div>
+
+                <div class="code-tabs">
+                    <button class="code-tab active" data-tab="bot">unibb_bot.py</button>
+                    <button class="code-tab" data-tab="install">Instalação</button>
+                    <button class="code-tab" data-tab="requirements">requirements.txt</button>
+                </div>
+
+                <div class="code-container">
+                    <button class="btn-copy" onclick="copiarCodigo('codePython')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                    <pre id="codePython"><code class="language-python"># Ver arquivo unibb_bot.py</code></pre>
+                </div>
+
+                <div class="download-section">
+                    <button class="btn-primary" onclick="downloadArquivo('unibb_bot.py')">
+                        <i class="fas fa-download"></i> Download unibb_bot.py
+                    </button>
+                    <button class="btn-secondary" onclick="downloadArquivo('requirements.txt')">
+                        <i class="fas fa-download"></i> Download requirements.txt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">Processando...</p>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/parallel-execution.js"></script>
+</body>
+</html>
